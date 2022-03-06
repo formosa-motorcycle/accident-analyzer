@@ -1,11 +1,12 @@
 import got from "got";
-// ES6 or TypeScript:
 import cheerio from "cheerio";
 import stream from "node:stream";
 import fs from 'fs';
 import { promisify } from "node:util";
+/**
+ * This script is for downloading accident data of TYC.
+ */
 const baseURI = "https://data.tycg.gov.tw";
-// TODO: recursively create folder
 const baseDir = "data/tyc/";
 fs.mkdirSync(baseDir, { recursive: true });
 const data = await got(`${baseURI}/opendata/datalist/search?page=0&organize=380130000C&allText=桃園市交通事故資料表`, {
@@ -28,4 +29,3 @@ async function downloadCSV(dataPageLink) {
     await pipeline(got.stream(`${baseURI}${downloadLink}`), fs.createWriteStream(`${baseDir}${filename}`));
 }
 await Promise.all(dataPageLinks.map((_, link) => downloadCSV(link)));
-// const downloadStream = got.stream();
