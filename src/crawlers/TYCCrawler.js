@@ -5,11 +5,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 var TYCCrawler_1;
+import fs from 'fs';
 import stream from 'stream';
 import util from 'util';
-import got from 'got';
 import cheerio from 'cheerio';
-import fs from 'fs';
+import got from 'got';
 import { staticImplements } from '../utilities';
 /**
  * This class is for downloading accident data of TYC.

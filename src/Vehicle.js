@@ -66,4 +66,5 @@ Vehicle.PEDESTRIAN = new Vehicle('H01', VehicleCategory.PEDESTRIAN);
 Vehicle.PASSENGER = new Vehicle('H02', VehicleCategory.OTHER_PEOPLE);
 Vehicle.OTEHR_PEOPLE = new Vehicle('H03', VehicleCategory.OTHER_PEOPLE);
 Vehicle.OTHER = new Vehicle('', VehicleCategory.OTHER);
+Vehicle.codeToVehicleMapping = Object.fromEntries(Object.values(Vehicle).map((v) => [v.key, v]));
 export default Vehicle;

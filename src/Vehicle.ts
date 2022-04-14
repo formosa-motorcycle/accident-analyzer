@@ -108,6 +108,10 @@ export class Vehicle {
 
   static readonly OTHER = new Vehicle('', VehicleCategory.OTHER);
 
+  static readonly codeToVehicleMapping: { [key: string]: Vehicle } = Object.fromEntries(
+    Object.values(Vehicle).map((v) => [v.key, v]),
+  );
+
   // private to disallow creating other instances of this type
   private constructor(private readonly key: string, public readonly category: VehicleCategory) {}
 }

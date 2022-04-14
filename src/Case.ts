@@ -68,6 +68,7 @@
 // '67': '尚未發現肇事因素',
 // '':'空白',
 // }
+import luxon from 'luxon';
 
 import Party from './Party';
 import { autoImplements } from './utilities';
@@ -107,7 +108,7 @@ interface GPS {
 }
 
 interface CaseParameters {
-  date: Date;
+  date: luxon.DateTime;
   location: string;
   severity: number;
   death: number;
@@ -127,16 +128,14 @@ interface CaseParameters {
 /**
  * Class for indicate an accident case
  */
-export class Case extends autoImplements<CaseParameters>() {
-  // is_same(other: Case) {
-  //   Object.keys(this);
-  // excluded_fields = set(['parties'])
-  // fields = self.__dataclass_fields__.keys()
-  // return all(
-  //     getattr(self, f) == getattr(other, f)
-  //     for f in fields
-  //     if f not in excluded_fields)
-  // }
+export default class Case extends autoImplements<CaseParameters>() {
+  equalTo(other: Case) {
+    return (
+      this.date.equals(other.date)
+      && this.location === other.location
+      && this.severity === other.severity
+      && this.death === other.death
+      && this.injury === other.injury
+    );
+  }
 }
-
-export default Case;

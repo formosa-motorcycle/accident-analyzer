@@ -1,7 +1,7 @@
 /**
  * This is a helper function for automatically implementing the constructor of the data class. The
  * parameter of the constructor is an object containing the keys of all members of the interface
- * passed to this decorator.
+ * passed to this decorator. This feature is simlar to the `@dataclass` decorator in Python.
  *
  * Example:
  * interface BoxParameters {
