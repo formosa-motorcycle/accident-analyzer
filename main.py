@@ -1,33 +1,38 @@
 from collections import defaultdict
 import secrets
 import numpy as np
-
 from src.parsers.moi import MoiParser
 from src.parsers.tpe import parse_csv
+from src.parsers.tpe import parse_public_csv
 from src.case import *
 from glob import glob
 import pickle
 import re
 from pathlib import Path
 from pprint import pprint
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
-import matplotlib.colors as colors
-import matplotlib
-import json
-import matplotlib.font_manager as fm
-import mplcairo
+
+'''
+Importing matplotlib takes too much time, so comment out it by defaut.
+'''
+# import matplotlib.pyplot as plt
+# import matplotlib.ticker as ticker
+# import matplotlib.colors as colors
+# import matplotlib
+
+# import json
+# import matplotlib.font_manager as fm
+# import mplcairo
 
 
 def load_national_data(year: int) -> list[Case]:
-    pickle_path = f'./output/pickles/nation-{year}.pickle'
+    pickle_path = f'./outputs/pickles/nation-{year}.pickle'
     if Path(pickle_path).is_file():
         with open(pickle_path, 'rb') as f:
             print(f'loading {pickle_path}')
             return pickle.load(f)
     moi_parser = MoiParser()
     cases = []
-    for csv_filename in glob(f'全國/{year - 1911}*.csv'):
+    for csv_filename in glob(f'data/全國/{year - 1911}*.csv'):
         match = re.search(r'(\d+)年度A(\d).*交通事故資料', csv_filename)
         if match is None:
             print(f'wrong filename: {csv_filename}')
@@ -47,19 +52,29 @@ def load_all_national_data() -> dict[int, list[Case]]:
     return all_years_cases
 
 
-def load_tpe_data() -> list[Case]:
-    year = 2020
-    pickle_path = f'./output/pickles/tpe-{year}.pickle'
+def load_tpe_data(year: int) -> list[Case]:
+    pickle_path = f'./outputs/pickles/tpe-{year}.pickle'
     if Path(pickle_path).is_file():
         with open(pickle_path, 'rb') as f:
             print(f'loading {pickle_path}')
             return pickle.load(f)
     # moi_parser = MoiParser()
-    cases = parse_csv('台北市/新增資料夾 (5)/109.csv', 2020)
+    filename_with_full_data = f'./data/台北市/新增資料夾 (5)/{year - 1911}.csv'
+    print(f'start to parse {year}')
+    if Path(filename_with_full_data).is_file():
+        cases = parse_csv(filename_with_full_data, year)
+    else:
+        cases = parse_public_csv(f'./data/台北市/{year - 1911}.csv', year)
     if cases:
         with open(pickle_path, 'wb') as f:
             pickle.dump(cases, f)
     return cases
+
+def load_all_tpe_data() -> dict[int, list[Case]]:
+    all_years_cases = {}
+    for year in range(2012, 2022):
+        all_years_cases[year] = load_tpe_data(year)
+    return all_years_cases
 
 
 @dataclass
@@ -377,7 +392,7 @@ def stat_first_and_second(
 
 
 def draw_vehicle_diagram():
-    tpe_cases = load_tpe_data()
+    tpe_cases = load_tpe_data(2020)
     national_cases = load_all_national_data()
     # Taipei's A3 date is not contained in the national data
     a1a2a3_2020_cases = national_cases[2020] + [
@@ -617,8 +632,57 @@ def _draw_vehicle_diagram(title: str, filename: str,
     plt.savefig(filename, dpi=500)
     plt.show()
 
+def print_tpe_bicycle_case_per_month():
+    all_cases = load_all_tpe_data()
+    deaths = defaultdict(int)
+    injuries = defaultdict(int)
+    for year in range(2019, 2022):
+        for case in all_cases[year]:
+            for party in case.parties:
+                if party.vehicle.category == VehicleCategory.BICYCLE:
+                    if party.injury_severity in [1, 5]: 
+                        deaths[f'{case.date.year}-{case.date.month}'] += 1
+                    elif party.injury_severity == 2:
+                        injuries[f'{case.date.year}-{case.date.month}'] += 1
+    keys = [f'{year}-{month}' for year in range(2019, 2022) for month in range(1, 13)]
+    for key in keys:
+        print(f'{key}: {deaths[key]}')
+    for key in keys:
+        print(f'{key}: {injuries[key]}')
+
+    def get_pk(k, arr):
+        a = len(arr) * k
+        if a % 100 == 0:
+            a //= 100
+            return (arr[a - 1] + arr[a]) / 2
+        a = int(a / 100)
+        return arr[a]
+
+    sorted_deaths = sorted([deaths[key] for key in keys])
+    sorted_injuries = sorted([injuries[key] for key in keys])
+    ks = [50, 60, 80]
+    print(sorted_deaths)
+    print(min(sorted_deaths), *[get_pk(k, sorted_deaths) for k in ks], max(sorted_deaths))
+    print(sorted_injuries)
+    print(min(sorted_injuries), *[get_pk(k, sorted_injuries) for k in ks], max(sorted_injuries))
+
+def count_tpe_first_party():
+    all_cases = load_all_tpe_data()
+    all_cases = { y: all_cases[y] for y in range(2019, 2022) }
+    first_party_count = defaultdict(int)
+    for cases in all_cases.values():
+        for case in cases:
+            if case.severity == 1:
+                for party in case.parties:
+                    if party.order == 1:
+                        first_party_count[party.vehicle.category] += 1
+                        continue
+    print(first_party_count)
+
 
 if __name__ == '__main__':
     # print_percentages_from_national()
     # draw_vehicle_diagram()
-    draw_vehicle_diagram_with_cache()
+    # draw_vehicle_diagram_with_cache()
+    # print_tpe_bicycle_case_per_month()
+    count_tpe_first_party()
