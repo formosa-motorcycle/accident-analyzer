@@ -53,5 +53,47 @@ def parse_csv(filename: str, year: int):
     #     pickle.dump(list(cases.values()), f)
     return list(cases.values())
 
+def parse_public_csv(filename: str, year: int):
+    cases = {}
+    with open(filename) as f:
+        reader = DictReader(f)
+        for row in reader:
+            if row['性別'] == '3': # 性別 == 3: 物或動物
+                continue
+            try:
+                date = datetime.strptime(
+                        f'{int(row["發生年"]) + 1911}/{row["發生月"]}/{row["發生日"]} {row["發生時"].zfill(2)}:{row["發生分"].zfill(2)}',
+                        '%Y/%m/%d %H:%M')
+                location=row['肇事地點']
+                id=f'{date.strftime("%Y%m%d_%H%M")}-{location}'
+                case = Case(
+                    id=id,
+                    date=date,
+                    location=location,
+                    severity=int(row['處理別']),
+                    parties=[],
+                )
+                party = Party(
+                    order=int(row['當事人序']),
+                    gender=int(row['性別'] or 5),
+                    age=int(row['年齡'] or -1),
+                    injury_severity=int(row['受傷程度'] or 6),
+                    vehicle=Vehicle(row['車種']),
+                    # data before 2019, included, doesn't have personal cause
+                    cause=int(row.get('肇因碼-個別', 0) or 0)
+                )
+            except ValueError as e:
+                pprint(e.args)
+                raise ValueError(row)
+            if case.id in cases:
+                if not cases[case.id].is_same_unsafe(case):
+                    raise Exception(f'{case} {cases[case.id]} not the same')
+                cases[case.id].parties.append(party)
+            else:
+                case.parties.append(party)
+                cases[case.id] = case
+    # with open(get_pickle_path(year), 'wb') as f:
+    #     pickle.dump(list(cases.values()), f)
+    return list(cases.values())
 
 # parse_csv('台北市/新增資料夾 (5)/109.csv', 2020)
