@@ -279,6 +279,7 @@ class Case:
     parties: list[Party]
     id: str | None = None
     gps: Gps | None = None
+    is_self: bool = False
 
     def is_same(self, other: 'Case'):
         excluded_fields = set(['parties'])

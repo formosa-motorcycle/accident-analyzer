@@ -59,7 +59,7 @@ def load_tpe_data(year: int) -> list[Case]:
             print(f'loading {pickle_path}')
             return pickle.load(f)
     # moi_parser = MoiParser()
-    filename_with_full_data = f'./data/台北市/新增資料夾 (5)/{year - 1911}.csv'
+    filename_with_full_data = f'./data/台北市/hackathon/{year - 1911}-A1_A4.csv'
     print(f'start to parse {year}')
     if Path(filename_with_full_data).is_file():
         cases = parse_csv(filename_with_full_data, year)
@@ -680,9 +680,32 @@ def count_tpe_first_party():
     print(first_party_count)
 
 
+def count_tpe_self_accidents():
+    all_cases = { y: load_tpe_data(y) for y in range(2016, 2021) }
+    T = lambda: defaultdict(T)
+    statistics = T()
+    for cases in all_cases.values():
+        for case in cases:
+            for party in case.parties:
+                if party.order == 1:
+                    node = statistics[party.vehicle.category][case.severity]
+                    if type(node[case.is_self]) == int:
+                        node[case.is_self] += 1
+                    else:
+                        node[case.is_self] = 1
+                    continue
+
+    for category in statistics:
+        if not category in [VehicleCategory.CAR, VehicleCategory.PICKUP_TRUCK, VehicleCategory.MOTORCYCLE]:
+            continue
+        print(category)
+        for severity in statistics[category]:
+            print('  ', severity, dict(statistics[category][severity]))
+
 if __name__ == '__main__':
     # print_percentages_from_national()
     # draw_vehicle_diagram()
     # draw_vehicle_diagram_with_cache()
     # print_tpe_bicycle_case_per_month()
-    count_tpe_first_party()
+    # count_tpe_first_party()
+    count_tpe_self_accidents()

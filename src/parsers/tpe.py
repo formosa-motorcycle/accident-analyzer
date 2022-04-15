@@ -17,6 +17,7 @@ def parse_csv(filename: str, year: int):
             if row['非交通事故'] == '1' or row['性別'] == '3': # 性別 == 3: 物或動物
                 continue
             try:
+                case_type = int(row['15事故類型及型態'] or 0)
                 case = Case(
                     id=row['案號'],
                     date=datetime.strptime(
@@ -24,6 +25,7 @@ def parse_csv(filename: str, year: int):
                         '%Y/%m/%d %H:%M'),
                     location=row['肇事地點'],
                     severity=int(row['處理別']),
+                    is_self=case_type >= 18 and case_type <= 29,
                     parties=[],
                 )
                 # field should only omit for A4
