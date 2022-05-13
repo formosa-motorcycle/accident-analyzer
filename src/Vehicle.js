@@ -11,7 +11,7 @@ export var VehicleCategory;
     VehicleCategory["OTHER_PEOPLE"] = "\u5176\u4ED6\u4EBA";
     VehicleCategory["OTHER"] = "\u5176\u4ED6";
 })(VehicleCategory || (VehicleCategory = {}));
-export class Vehicle {
+export default class Vehicle {
     // private to disallow creating other instances of this type
     constructor(key, category) {
         this.key = key;
@@ -67,4 +67,14 @@ Vehicle.PASSENGER = new Vehicle('H02', VehicleCategory.OTHER_PEOPLE);
 Vehicle.OTEHR_PEOPLE = new Vehicle('H03', VehicleCategory.OTHER_PEOPLE);
 Vehicle.OTHER = new Vehicle('', VehicleCategory.OTHER);
 Vehicle.codeToVehicleMapping = Object.fromEntries(Object.values(Vehicle).map((v) => [v.key, v]));
-export default Vehicle;
+export var VehicleUsage;
+(function (VehicleUsage) {
+    VehicleUsage[VehicleUsage["GRAVEL_TRACK"] = 1] = "GRAVEL_TRACK";
+    VehicleUsage[VehicleUsage["CHILDREN_USE_VEHICLE"] = 2] = "CHILDREN_USE_VEHICLE";
+    VehicleUsage[VehicleUsage["SCHOOL_BUS"] = 3] = "SCHOOL_BUS";
+    VehicleUsage[VehicleUsage["DISABLED_SPECIAL_VEHICLE"] = 4] = "DISABLED_SPECIAL_VEHICLE";
+    VehicleUsage[VehicleUsage["COACH_VEHICLE"] = 5] = "COACH_VEHICLE";
+    VehicleUsage[VehicleUsage["LOADING_DANGEROUS_GOODS"] = 6] = "LOADING_DANGEROUS_GOODS";
+    VehicleUsage[VehicleUsage["OTHER"] = 7] = "OTHER";
+    VehicleUsage[VehicleUsage["NOT_DRIVER"] = 8] = "NOT_DRIVER";
+})(VehicleUsage || (VehicleUsage = {}));

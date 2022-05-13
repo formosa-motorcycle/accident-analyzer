@@ -102,8 +102,10 @@ let TYCParser = class TYCParser {
             let currentCase = new Case({
                 date,
                 location,
+                firstAdministrativeLevel: data['縣市'],
+                secondAdministrativeLevel: data['區'],
                 severity,
-                death,
+                deathIn24Hours: death,
                 injury,
                 parties: [],
                 id: `${date.toFormat('yyyyMMdd_HHmm')}_${location}`,

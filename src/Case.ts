@@ -102,6 +102,177 @@ export enum RoadHierarchy {
   OTHER = 8,
 }
 
+export enum RoadGeometry {
+  OPEN_LEVEL_CROSSING = 1,
+  BARRIER_LEVEL_CROSSING = 2,
+  THREE_WAY_INTERSECTION = 3,
+  CROSS_INTERSECTION = 4,
+  MULTIWAY_INTERSECTION = 5,
+  TUNNEL = 6,
+  UNDERPASS = 7,
+  BRIDGE = 8,
+  CULVERT = 9,
+  VIADUCT = 10,
+  CURVE = 11,
+  SLOPE = 12,
+  ALLEY = 13,
+  STRAIGHT = 14,
+  OTHER = 15,
+  ROUNDABOUT = 16,
+  SQUARE = 17,
+}
+
+export enum Position {
+  INTERSECTION = 1,
+  NEARBY_INTERSECTION = 2,
+  HOOK_TURN_AREA = 3,
+  BIKE_STOP_AREA = 4,
+  TRAFFIC_ISLAND = 5,
+  U_TURN = 6,
+  FAST_LANE = 7,
+  SLOW_LANE = 8,
+  NORMAL_LANE = 9,
+  BUS_LANE = 10,
+  MOTORCYCLE_LANE = 11,
+  MOTORCYCLE_FIRST_LANE = 12,
+  ROAD_SHOULDER = 13,
+  ACCELERATION_LANE = 14,
+  DECELERATION_LANE = 15,
+  STRAIGHT_RAMP = 16,
+  BEND_RAMP = 17,
+  PEDESTRIAN_CROSSING = 18,
+  NEARBY_PEDESTRIAN_CROSSING = 19,
+  SIDEWALK = 20,
+  TOLLGATE = 21,
+  OTHER = 22,
+}
+
+export enum RoadMaterial {
+  ASPHALT = 1,
+  CONCRETE = 2,
+  GRAVEL = 3,
+  OTHER = 4,
+  NONE = 5,
+}
+
+export enum RoadSurfaceWet {
+  SNOW = 1,
+  OIL = 2,
+  MUD = 3,
+  WET = 4,
+  DRY = 5,
+}
+
+export enum RoadSurfaceDefect {
+  SOFT,
+  CORRUGATION,
+  HOLE,
+  NONE,
+}
+
+export enum Obstacle {
+  UNDER_CONSTRUCTION = 1,
+  STUFF = 2,
+  PARKING = 3,
+  OTHER = 4,
+  NONE = 5,
+}
+
+export enum SightDistance {
+  BEND = 1,
+  SLOPE = 2,
+  BUILDING = 3,
+  PLANT = 4,
+  PARKING = 5,
+  OTHER = 6,
+  GOOD = 7,
+}
+
+export enum TrafficSignal {
+  NORMAL = 1,
+  NORMAL_WITH_WALKING_PERSON = 2,
+  FLASH = 3,
+  NONE = 4,
+}
+
+export enum TrafficSignalStatus {
+  NORMAL = 1,
+  UNUSUAL = 2,
+  NO_ACTION = 3,
+  NO_TRAFFIC_LIGHT = 4,
+}
+
+export enum DirectionDivider {
+  WIDE_ISLAND = 1, // 50 cm above
+  NARROW_ISLAND_WITH_BARRIER = 2,
+  NARROW_ISLAND_WITHOUT_BARRIER = 3,
+  DOUBLE_YELLOW_LINE_WITH_MARK = 4,
+  DOUBLE_YELLOW_LINE_WITHOUT_MARK = 5,
+  SOLID_BROKEN_YELLOW_LINE_WITH_MARK = 6,
+  SOLID_BROKEN_YELLOW_LINE_WITHOUT_MARK = 7,
+  BROKEN_YELLOW_LINE_WITH_MARK = 8,
+  BROKEN_YELLOW_LINE_WITHOUT_MARK = 9,
+  NONE = 10,
+}
+
+export enum NormalLaneDivider {
+  DOUBLE_WHITE_LINE_WITH_MARK = 1,
+  DOUBLE_WHITE_LINE_WITHOUT_MARK = 2,
+  BROKEN_WHITE_LINE_WITH_MARK = 3,
+  BROKEN_WHITE_LINE_WITHOUT_MARK = 4,
+  NONE = 5,
+}
+
+export enum FastSlowLaneDivider {
+  WIDE_ISLAND = 1, // 50 cm above
+  NARROW_ISLAND_WITH_BARRIER = 2,
+  NARROW_ISLAND_WITHOUT_BARRIER = 3,
+  FAST_SLOW_LANE_LINE = 4,
+  NONE = 5,
+}
+
+export enum EdgeLine {
+  HAVE = 1,
+  NONE = 2,
+}
+
+export enum CrashType {
+  WALK_INVERSE_DIRECTION = 1,
+  WALK_SAME_DIRECTION = 2,
+  CROSSING_ROAD = 3,
+  PLAYING_ON_ROAD = 4,
+  WORKING_ON_ROAD = 5,
+  RUNNING_INTO_ROAD = 6,
+  IMMERSING_BEHIND_CARS = 7,
+  STANDING_OUTSIDE_ROAD = 8,
+  OTHER_HUMAN_AND_VEHICLE = 9,
+  HEAD_ON = 10,
+  OPPOSITE_DIRECTION_SIDESWIPE = 11,
+  SAME_DIRECTION_SIDESWIPE = 12,
+  REAR_END = 13,
+  IN_REVERSE = 14,
+  CROSS_TRAFFIC = 15,
+  SIDE_IMPACT = 16,
+  OTHER_VEHICLE_ANDCEHICLE = 17,
+  ROLL_OVER_OR_SLIDE = 18,
+  RUSH_OUT_OF_ROAD = 19,
+  BARRIER_IMPACT = 20,
+  TRAFFIC_LIGHT_IMPACT = 21,
+  TOLLGATE_IMPACT = 22,
+  ISLAND_IMPACT = 23,
+  UNFIXED_FACILITY_IMPACT = 24,
+  BRIDGE_BUILDING_IMPACT = 25,
+  TREE_UTILITY_POLE_IMPACT = 26,
+  ANIMAL_IMPACT = 27,
+  CONSTRUCTION_FACILITY_IMPACT = 28,
+  OTHER_SINGLE_VEHICLE = 29,
+  LEVEL_CROSSING_BARRIER_IMPACT = 30,
+  CROSSING_LEVEL_CROSSING = 31,
+  STOP_WRONG_POSITION = 32,
+  STUCK_IN_LEVEL_CROSSING = 33,
+  OTEHR_LEVEL_CROSSING = 34,
+}
+
 interface GPS {
   lng: number;
   lat: number;
@@ -110,19 +281,33 @@ interface GPS {
 interface CaseParameters {
   date: luxon.DateTime;
   location: string;
+  firstAdministrativeLevel: string;
+  secondAdministrativeLevel: string;
   severity: number;
-  death: number;
-  injury: number;
+  id?: string;
+  gps?: GPS;
+  deathIn24Hours?: number;
+  deathIn30Days?: number;
+  injury?: number;
   weather?: Weather;
   light?: Light;
   roadHierarchy?: RoadHierarchy;
-  // speedLimit: number
-  // roadGeometry: number
-  // lane: number
-  // roadSurface: number
+  speedLimit?: number;
+  roadGeometry?: RoadGeometry;
+  position?: Position;
+  roadMaterial?: RoadMaterial;
+  roadSurfaceWet?: RoadSurfaceWet;
+  roadSurfaceDefect?: RoadSurfaceDefect;
+  obstacle?: Obstacle;
+  sightDistance?: SightDistance;
+  trafficSignal?: TrafficSignal;
+  trafficSignalStatus?: TrafficSignalStatus;
+  directionDivider?: DirectionDivider;
+  normalLaneDivider?: NormalLaneDivider;
+  fastSlowLaneDivider?: FastSlowLaneDivider;
+  edgeLine?: EdgeLine;
+  crashType?: CrashType;
   parties: Party[];
-  id?: string;
-  gps?: GPS;
 }
 
 /**
@@ -134,7 +319,8 @@ export default class Case extends autoImplements<CaseParameters>() {
       this.date.equals(other.date)
       && this.location === other.location
       && this.severity === other.severity
-      && this.death === other.death
+      && this.deathIn24Hours === other.deathIn24Hours
+      && this.deathIn30Days === other.deathIn30Days
       && this.injury === other.injury
     );
   }

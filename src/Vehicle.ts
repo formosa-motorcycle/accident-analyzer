@@ -11,7 +11,7 @@ export enum VehicleCategory {
   OTHER = '其他',
 }
 
-export class Vehicle {
+export default class Vehicle {
   static readonly PUBLIC_CITY_BUS = new Vehicle('A01', VehicleCategory.BUS);
 
   static readonly PRIVATE_CITY_BUS = new Vehicle('A02', VehicleCategory.BUS);
@@ -116,4 +116,13 @@ export class Vehicle {
   private constructor(private readonly key: string, public readonly category: VehicleCategory) {}
 }
 
-export default Vehicle;
+export enum VehicleUsage {
+  GRAVEL_TRACK = 1,
+  CHILDREN_USE_VEHICLE = 2,
+  SCHOOL_BUS = 3,
+  DISABLED_SPECIAL_VEHICLE = 4,
+  COACH_VEHICLE = 5,
+  LOADING_DANGEROUS_GOODS = 6,
+  OTHER = 7,
+  NOT_DRIVER = 8,
+}
