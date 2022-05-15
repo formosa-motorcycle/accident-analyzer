@@ -7,7 +7,7 @@ import luxon from 'luxon';
 
 import { staticImplements } from '../utilities';
 import BaseParser from './BaseParser';
-import Case from '../Case';
+import Case, { Severity } from '../Case';
 import Party from '../Party';
 import Vehicle from '../Vehicle';
 
@@ -17,8 +17,7 @@ function isNumber(value: string): boolean {
 
 function isChineseNumberOrNumber(value: string): boolean {
   return (
-    ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'].includes(value)
-    || isNumber(value)
+    ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'].includes(value) || isNumber(value)
   );
 }
 
@@ -59,15 +58,94 @@ function buildValidator(fail: () => void) {
   return [required, optional, empty];
 }
 
+// eslint-disable-next-line no-use-before-define
+function assignIfExists<T extends { [P in K]?: number | number[] }, K extends keyof T>(
+  target: T,
+  key: K,
+  value: string,
+) {
+  if (!['', 'NA'].includes(value)) {
+    const valueRef: number | number[] | undefined = target[key];
+    if (valueRef !== undefined && valueRef instanceof Array) {
+      valueRef.push(Number(value));
+    } else {
+      const targetRef: { [P in K]?: number | number[] } = target;
+      targetRef[key] = Number(value);
+    }
+  }
+}
+
 @staticImplements<BaseParser>()
 export default class TYCParser {
   static async parseCSV(filename: string, verify: boolean = false): Promise<Case[]> {
     const inStream = fs.createReadStream(filename);
     const cases: Case[] = [];
     let prevCase: Case | null = null;
+    let line = 1;
 
+    // no national road
+    // has A2-1
+    // no A3 A4
+    // only contain the first and the second parties?
     const parseLineBefore2016 = (data: { [key: string]: string }) => {
-      console.log(data);
+      line += 1;
+      // The datasets between 2014 and 2016 repeat the header at the begin of A2 case section.
+      if (data['年月'] === '年月') {
+        return;
+      }
+
+      let vehicleCode = data['當事者區分類別'];
+      vehicleCode = vehicleCode === 'NA' ? '' : vehicleCode;
+      const party = new Party({
+        order: Number(data['當事者順序']),
+        vehicle: Vehicle.codeToVehicleMapping[vehicleCode],
+      });
+      if (data['屬性別'] != null) {
+        // Only the csv between 2014 and 2016 has this field.
+        party.gender = Number(data['屬性別']);
+      }
+      // If the field can not be empty, the value will not be assigned by `assignIfExists()` to
+      // apply value check in runtime.
+      assignIfExists(party, 'injurySeverity', data['受傷程度']);
+      assignIfExists(party, 'injuriedArea', data['主要傷處']);
+      assignIfExists(party, 'saftyDevice', data['保護裝備']);
+      assignIfExists(party, 'smartPhone', data['行動電話']);
+      assignIfExists(party, 'vehicleUsage', data['車輛用途']);
+      assignIfExists(party, 'action', data['當事者行動狀態']);
+      assignIfExists(party, 'driverQualification', data['駕駛資格情形']);
+      assignIfExists(party, 'license', data['駕駛執照種類']);
+      assignIfExists(party, 'drunkDriving', data['飲酒情形']);
+      assignIfExists(party, 'crashArea', data['車輛撞擊部位最初']);
+      assignIfExists(party, 'crashArea', data['車輛撞擊部位其他']);
+      assignIfExists(party, 'cause', data['肇事因素個別']);
+      // data['肇事逃逸'] may be an empty string.
+      if (data['肇事逃逸']) {
+        // 1: not hit and run
+        // 2: hit and run
+        party.isHitAndRun = data['肇事逃逸'] === '2';
+      }
+      assignIfExists(party, 'job', data['職業']);
+      assignIfExists(party, 'travelPurpose', data['旅次目的']);
+      assignIfExists(party, 'citizenship', data['國籍']);
+
+      // Few cases were happened at the same location and the same time, so we cannot distinguish
+      // them from the meta-information of the case. Take the cases in the dataset for exmaple.
+      // There was one vehicle crashing with the other accident vehicle which self-slided earlier.
+      // They were two cases at the same location and the same time. There is another example.
+      // There were three scooters self-sliding at the same location and the same time. The police
+      // record this event as three cases.
+      // We assume that each case starts with the first party. We will verify this assumption below.
+      if (prevCase != null && party.order !== 1) {
+        prevCase.parties.push(party);
+        return;
+      }
+
+      if (party.order === 1 && Number(data['主要肇因']) !== party.cause) {
+        throw new Error(
+          `${filename}:${line} The cause of the first party is not the same as the main cause.`,
+        );
+      }
+
       let locationSections = [
         data['縣市'],
         data['區'],
@@ -106,47 +184,61 @@ export default class TYCParser {
           zone: 'Asia/Taipei',
         },
       );
-      const location = locationSections.join('');
-      const death = Number(data['死']);
+
+      const location: string = locationSections.join('');
+      const deathIn24Hours = Number(data['死']);
+      const deathIn30Days = Number(data['事故後2至30日死亡']);
       const injury = Number(data['受傷']);
-      let severity = 3;
-      if (death) {
-        severity = 1;
+      let severity: Severity;
+      if (deathIn24Hours) {
+        severity = Severity.DEATH_IN_24_HOURS;
+      } else if (deathIn30Days) {
+        severity = Severity.DEATH_BETWEEN_2_TO_30_DAYS;
       } else if (injury) {
-        severity = 2;
+        severity = Severity.INJURY_ONLY;
+      } else {
+        severity = Severity.ONLY_PROPERTY_DAMAGE;
       }
-      let currentCase = new Case({
+      const currentCase = new Case({
+        id: `${date.toFormat('yyyyMMdd_HHmm')}_${location}`,
         date,
         location,
         firstAdministrativeLevel: data['縣市'],
         secondAdministrativeLevel: data['區'],
         severity,
-        deathIn24Hours: death,
-        injury,
         parties: [],
-        id: `${date.toFormat('yyyyMMdd_HHmm')}_${location}`,
       });
-      if (prevCase != null && currentCase.equalTo(prevCase)) {
-        currentCase = prevCase;
-      } else {
-        cases.push(currentCase);
-        prevCase = currentCase;
+      if (currentCase.id !== prevCase?.id && party.order !== 1) {
+        throw new Error(`${filename}:${line} The new case doesn't start with the first party.`);
       }
-      let vehicleCode = data['當事者區分類別'];
-      vehicleCode = vehicleCode === 'NA' ? '' : vehicleCode;
-      const injurySeverity = data['受傷程度'];
-      const party = new Party({
-        vehicle: Vehicle.codeToVehicleMapping[vehicleCode],
-        order: Number(data['當事者順序']),
-        cause: Number(data['肇事因素個別']),
-      });
-      if (injurySeverity !== 'NA') {
-        party.injurySeverity = Number(injurySeverity);
-      }
+
+      currentCase.deathIn24Hours = deathIn24Hours;
+      currentCase.deathIn30Days = deathIn30Days;
+      currentCase.injury = injury;
+      currentCase.weather = Number(data['天候']);
+      currentCase.light = Number(data['光線']);
+      currentCase.roadHierarchy = Number(data['道路類別']);
+      currentCase.speedLimit = Number(data['速限']);
+      currentCase.roadGeometry = Number(data['道路型態']);
+      currentCase.position = Number(data['事故位置']);
+      currentCase.roadMaterial = Number(data['路面鋪裝']);
+      currentCase.roadSurfaceWet = Number(data['路面狀態']);
+      currentCase.roadSurfaceDefect = Number(data['路面缺陷']);
+      currentCase.obstacle = Number(data['障礙物']);
+      currentCase.sightDistance = Number(data['視距']);
+      currentCase.trafficSignal = Number(data['號誌種類']);
+      currentCase.trafficSignalStatus = Number(data['號誌動作']);
+      currentCase.directionDivider = Number(data['分向設施']);
+      currentCase.normalLaneDivider = Number(data['快車道或一般車道間']);
+      currentCase.fastSlowLaneDivider = Number(data['快慢車道間']);
+      currentCase.edgeLine = Number(data['路面邊線']);
+      currentCase.crashType = Number(data['事故類型及型態']);
+
       currentCase.parties.push(party);
+      cases.push(currentCase);
+      prevCase = currentCase;
     };
 
-    const set1 = new Set();
     const parseLine = (data: { [key: string]: string }) => {
       if (verify) {
         if (!['交叉路口', '一般地址', '其他', '無'].includes(data['地址類型名稱'])) {
@@ -232,9 +324,6 @@ export default class TYCParser {
         location += `/${intersection}`;
       }
 
-
-
-
       if (verify) {
         if (!districtSections.every((s) => s.trim())) {
           console.log(data);
@@ -255,11 +344,7 @@ export default class TYCParser {
           optional('發生地址_巷', data['發生地址_巷'], isNumber);
           optional('發生地址_弄', data['發生地址_弄'], isNumber);
           optional('發生地址_號', data['發生地址_號'], isNumber);
-          optional(
-            '發生地址_前幾公尺',
-            normalizeMetersBefore(data['發生地址_前幾公尺']),
-            isNumber,
-          );
+          optional('發生地址_前幾公尺', normalizeMetersBefore(data['發生地址_前幾公尺']), isNumber);
           optional('發生地址_側名稱', data['發生地址_側名稱']);
         } else if (data['地址類型名稱'] === '無') {
           optional('發生地址_村里名稱', data['發生地址_村里名稱']);
@@ -270,10 +355,7 @@ export default class TYCParser {
           empty('發生地址_弄', data['發生地址_弄']);
           // some special cases have address number
           optional('發生地址_號', data['發生地址_號']);
-          empty(
-            '發生地址_前幾公尺',
-            normalizeMetersBefore(data['發生地址_前幾公尺']),
-          );
+          empty('發生地址_前幾公尺', normalizeMetersBefore(data['發生地址_前幾公尺']));
           empty('發生地址_側名稱', data['發生地址_側名稱']);
         } else if (data['地址類型名稱'] === '其他') {
           optional('發生地址_村里名稱', data['發生地址_村里名稱']);
@@ -283,11 +365,7 @@ export default class TYCParser {
           optional('發生地址_巷', data['發生地址_巷'], isNumber);
           optional('發生地址_弄', data['發生地址_弄'], isNumber);
           optional('發生地址_號', data['發生地址_號'], isNumber);
-          optional(
-            '發生地址_前幾公尺',
-            normalizeMetersBefore(data['發生地址_前幾公尺']),
-            isNumber,
-          );
+          optional('發生地址_前幾公尺', normalizeMetersBefore(data['發生地址_前幾公尺']), isNumber);
           optional('發生地址_側名稱', data['發生地址_側名稱']);
         }
         let good = false;
@@ -359,10 +437,6 @@ export default class TYCParser {
         break;
       }
     }
-    for (const c of cases) {
-      console.log(c);
-    }
-    console.log(Array.from(set1));
     return cases;
   }
 }

@@ -245,9 +245,14 @@ export enum TravelPurpose {
   UNKNOWN = 9,
 }
 
+export enum Citizenship {
+  CITIZEN = 1,
+  NON_CITIZEN = 2,
+}
+
 interface PartyParameters {
+    order: number;
     vehicle: Vehicle;
-    order?: number;
     gender?: Gender;
     age?: number;
     injurySeverity?: InjurySeverity;
@@ -259,10 +264,12 @@ interface PartyParameters {
     driverQualification?: DriverQualification;
     license?: License;
     drunkDriving?: DrunkDriving;
-    crashArea?: CrashArea;
+    crashArea?: [CrashArea];
     cause?: Cause;
+    isHitAndRun?: boolean;
     job?: Job;
     travelPurpose?: TravelPurpose;
+    citizenship?: Citizenship;
   }
 
 export default class Party extends autoImplements<PartyParameters>() {}

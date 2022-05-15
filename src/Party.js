@@ -243,5 +243,10 @@ export var TravelPurpose;
     TravelPurpose[TravelPurpose["OTHER"] = 8] = "OTHER";
     TravelPurpose[TravelPurpose["UNKNOWN"] = 9] = "UNKNOWN";
 })(TravelPurpose || (TravelPurpose = {}));
+export var Citizenship;
+(function (Citizenship) {
+    Citizenship[Citizenship["CITIZEN"] = 1] = "CITIZEN";
+    Citizenship[Citizenship["NON_CITIZEN"] = 2] = "NON_CITIZEN";
+})(Citizenship || (Citizenship = {}));
 export default class Party extends autoImplements() {
 }
