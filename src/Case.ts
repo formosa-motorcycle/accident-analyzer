@@ -73,6 +73,18 @@ import luxon from 'luxon';
 import Party from './Party';
 import { autoImplements } from './utilities';
 
+// If severity of one case is INJURY_ONLY_OR_DEATH_BETWEEN_2_TO_30_DAYS, it means we cannot
+// distinguish whether the case is a DEATH_BETWEEN_2_TO_30_DAYS case or a INJURY_ONLY case
+// from the dataset.
+export enum Severity {
+  DEATH_IN_24_HOURS = 1,
+  DEATH_BETWEEN_2_TO_30_DAYS = 2,
+  INJURY_ONLY_OR_DEATH_BETWEEN_2_TO_30_DAYS = 3,
+  INJURY_ONLY = 4,
+  ONLY_PROPERTY_DAMAGE = 5,
+  SELF_SETTLEMENT = 6,
+}
+
 export enum Weather {
   STROM = 1,
   STRONG_WIND = 2,
@@ -279,12 +291,12 @@ interface GPS {
 }
 
 interface CaseParameters {
+  id: string;
   date: luxon.DateTime;
   location: string;
   firstAdministrativeLevel: string;
   secondAdministrativeLevel: string;
-  severity: number;
-  id?: string;
+  severity: Severity;
   gps?: GPS;
   deathIn24Hours?: number;
   deathIn30Days?: number;
@@ -314,14 +326,13 @@ interface CaseParameters {
  * Class for indicate an accident case
  */
 export default class Case extends autoImplements<CaseParameters>() {
+  // This is not a perfect method to distinguish different cases.
+  // TODO: Find a perfect method to distinguish different cases.
   equalTo(other: Case) {
     return (
       this.date.equals(other.date)
       && this.location === other.location
       && this.severity === other.severity
-      && this.deathIn24Hours === other.deathIn24Hours
-      && this.deathIn30Days === other.deathIn30Days
-      && this.injury === other.injury
     );
   }
 }

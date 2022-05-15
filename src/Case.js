@@ -1,4 +1,16 @@
 import { autoImplements } from './utilities';
+// If severity of one case is INJURY_ONLY_OR_DEATH_BETWEEN_2_TO_30_DAYS, it means we cannot
+// distinguish whether the case is a DEATH_BETWEEN_2_TO_30_DAYS case or a INJURY_ONLY case
+// from the dataset.
+export var Severity;
+(function (Severity) {
+    Severity[Severity["DEATH_IN_24_HOURS"] = 1] = "DEATH_IN_24_HOURS";
+    Severity[Severity["DEATH_BETWEEN_2_TO_30_DAYS"] = 2] = "DEATH_BETWEEN_2_TO_30_DAYS";
+    Severity[Severity["INJURY_ONLY_OR_DEATH_BETWEEN_2_TO_30_DAYS"] = 3] = "INJURY_ONLY_OR_DEATH_BETWEEN_2_TO_30_DAYS";
+    Severity[Severity["INJURY_ONLY"] = 4] = "INJURY_ONLY";
+    Severity[Severity["ONLY_PROPERTY_DAMAGE"] = 5] = "ONLY_PROPERTY_DAMAGE";
+    Severity[Severity["SELF_SETTLEMENT"] = 6] = "SELF_SETTLEMENT";
+})(Severity || (Severity = {}));
 export var Weather;
 (function (Weather) {
     Weather[Weather["STROM"] = 1] = "STROM";
@@ -206,9 +218,6 @@ export default class Case extends autoImplements() {
     equalTo(other) {
         return (this.date.equals(other.date)
             && this.location === other.location
-            && this.severity === other.severity
-            && this.deathIn24Hours === other.deathIn24Hours
-            && this.deathIn30Days === other.deathIn30Days
-            && this.injury === other.injury);
+            && this.severity === other.severity);
     }
 }
