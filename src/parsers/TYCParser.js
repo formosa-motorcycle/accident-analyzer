@@ -76,6 +76,11 @@ let TYCParser = class TYCParser {
             if (data['年月'] === '年月') {
                 return;
             }
+            // The csv parse sometimes writes an extra empty object to this function between line 17205
+            // and line 17206 of the data sheet of 2013. The root cause is not clear.
+            if (Object.keys(data).length === 0) {
+                return;
+            }
             let vehicleCode = data['當事者區分類別'];
             vehicleCode = vehicleCode === 'NA' ? '' : vehicleCode;
             const party = new Party({

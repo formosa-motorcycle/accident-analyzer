@@ -3,20 +3,28 @@ import util from 'util';
 import TYCCrawler from './src/crawlers/TYCCrawler';
 import TYCParser from './src/parsers/TYCParser';
 import { ShapeOfFields, generateShapeOfFields } from './src/tools/shapeOfFields';
+import CSVExporter from './src/exporters/CSVExporter';
 
-const outDir = 'data/tyc/';
+const dataDir = 'data';
+const outputsDir = 'outputs';
 
-// TYCCrawler.downloadAll(outDir);
+// TYCCrawler.downloadAll(dataDir);
 const allCases = await Promise.all([
-  TYCParser.parseCSV(`${outDir}101.csv`),
-  TYCParser.parseCSV(`${outDir}102.csv`),
-  TYCParser.parseCSV(`${outDir}traffic_accident_103.csv`),
-  TYCParser.parseCSV(`${outDir}traffic_accident_104.csv`),
-  TYCParser.parseCSV(`${outDir}traffic_accident_105.csv`),
-  // TYCParser.parseCSV(`${outDir}traffic106_10809_fix.csv`),
-  // TYCParser.parseCSV(`${outDir}traffic109_fix.csv`),
-  // TYCParser.parseCSV(`${outDir}traffic11011_fix.csv`),
+  TYCParser.parseCSV(`${dataDir}/tyc/101.csv`),
+  TYCParser.parseCSV(`${dataDir}/tyc/102.csv`),
+  TYCParser.parseCSV(`${dataDir}/tyc/traffic_accident_103.csv`),
+  TYCParser.parseCSV(`${dataDir}/tyc/traffic_accident_104.csv`),
+  TYCParser.parseCSV(`${dataDir}/tyc/traffic_accident_105.csv`),
+  // TYCParser.parseCSV(`${dataDir}/tyc/traffic106_10809_fix.csv`),
+  // TYCParser.parseCSV(`${dataDir}/tyc/traffic109_fix.csv`),
+  // TYCParser.parseCSV(`${dataDir}/tyc/traffic11011_fix.csv`),
 ]);
+
+CSVExporter.export(`${outputsDir}/tyc/tyc-2012.csv`, allCases[0], 2);
+CSVExporter.export(`${outputsDir}/tyc/tyc-2013.csv`, allCases[1], 2);
+CSVExporter.export(`${outputsDir}/tyc/tyc-2014.csv`, allCases[2], 2);
+CSVExporter.export(`${outputsDir}/tyc/tyc-2015.csv`, allCases[3], 2);
+CSVExporter.export(`${outputsDir}/tyc/tyc-2016.csv`, allCases[4], 2);
 
 const excludedFields = new Set([
   '村里',

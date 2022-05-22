@@ -113,7 +113,7 @@ export default class Vehicle {
   );
 
   // private to disallow creating other instances of this type
-  private constructor(private readonly key: string, public readonly category: VehicleCategory) {}
+  private constructor(public readonly key: string, public readonly category: VehicleCategory) {}
 }
 
 export enum VehicleUsage {

@@ -285,7 +285,7 @@ export enum CrashType {
   OTEHR_LEVEL_CROSSING = 34,
 }
 
-interface GPS {
+export interface GPS {
   lng: number;
   lat: number;
 }
