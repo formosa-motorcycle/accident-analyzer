@@ -265,7 +265,7 @@ interface PartyParameters {
     driverQualification?: DriverQualification;
     license?: License;
     drunkDriving?: DrunkDriving;
-    crashArea?: [CrashArea];
+    crashArea?: [CrashArea] | [CrashArea, CrashArea];
     cause?: Cause;
     isHitAndRun?: boolean;
     job?: Job;
