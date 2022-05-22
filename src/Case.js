@@ -103,10 +103,10 @@ export var RoadSurfaceWet;
 })(RoadSurfaceWet || (RoadSurfaceWet = {}));
 export var RoadSurfaceDefect;
 (function (RoadSurfaceDefect) {
-    RoadSurfaceDefect[RoadSurfaceDefect["SOFT"] = 0] = "SOFT";
-    RoadSurfaceDefect[RoadSurfaceDefect["CORRUGATION"] = 1] = "CORRUGATION";
-    RoadSurfaceDefect[RoadSurfaceDefect["HOLE"] = 2] = "HOLE";
-    RoadSurfaceDefect[RoadSurfaceDefect["NONE"] = 3] = "NONE";
+    RoadSurfaceDefect[RoadSurfaceDefect["SOFT"] = 1] = "SOFT";
+    RoadSurfaceDefect[RoadSurfaceDefect["CORRUGATION"] = 2] = "CORRUGATION";
+    RoadSurfaceDefect[RoadSurfaceDefect["HOLE"] = 3] = "HOLE";
+    RoadSurfaceDefect[RoadSurfaceDefect["NONE"] = 4] = "NONE";
 })(RoadSurfaceDefect || (RoadSurfaceDefect = {}));
 export var Obstacle;
 (function (Obstacle) {

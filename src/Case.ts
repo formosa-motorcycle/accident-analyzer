@@ -176,10 +176,10 @@ export enum RoadSurfaceWet {
 }
 
 export enum RoadSurfaceDefect {
-  SOFT,
-  CORRUGATION,
-  HOLE,
-  NONE,
+  SOFT = 1,
+  CORRUGATION = 2,
+  HOLE = 3,
+  NONE = 4,
 }
 
 export enum Obstacle {
