@@ -215,6 +215,8 @@ export var CrashType;
  * Class for indicate an accident case
  */
 export default class Case extends autoImplements() {
+    // This is not a perfect method to distinguish different cases.
+    // TODO: Find a perfect method to distinguish different cases.
     equalTo(other) {
         return (this.date.equals(other.date)
             && this.location === other.location

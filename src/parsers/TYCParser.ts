@@ -126,7 +126,9 @@ export default class TYCParser {
       }
       assignIfExists(party, 'job', data['職業']);
       assignIfExists(party, 'travelPurpose', data['旅次目的']);
-      assignIfExists(party, 'citizenship', data['國籍']);
+      if (data['國籍'] != null) {
+        party.citizenship = Number(data['國籍']) + 1;
+      }
 
       // Few cases were happened at the same location and the same time, so we cannot distinguish
       // them from the meta-information of the case. Take the cases in the dataset for exmaple.
