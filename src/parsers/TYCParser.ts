@@ -82,14 +82,14 @@ export default class TYCParser {
     const inStream = fs.createReadStream(filename);
     const cases: Case[] = [];
     let prevCase: Case | null = null;
-    let line = 1;
+    let lineNumber = 1;
 
     // no national road
     // has A2-1
     // no A3 A4
     // only contain the first and the second parties?
     const parseLineBefore2016 = (data: { [key: string]: string }) => {
-      line += 1;
+      lineNumber += 1;
       // The datasets between 2014 and 2016 repeat the header at the begin of A2 case section.
       if (data['年月'] === '年月') {
         return;
@@ -146,7 +146,7 @@ export default class TYCParser {
 
       if (party.order === 1 && Number(data['主要肇因']) !== party.cause) {
         throw new Error(
-          `${filename}:${line} The cause of the first party is not the same as the main cause.`,
+          `${filename}:${lineNumber} The cause of the first party is not the same as the main cause.`,
         );
       }
 
@@ -216,7 +216,9 @@ export default class TYCParser {
         (currentCase.date !== prevCase?.date || currentCase.location !== prevCase?.location)
         && party.order !== 1
       ) {
-        throw new Error(`${filename}:${line} The new case doesn't start with the first party.`);
+        throw new Error(
+          `${filename}:${lineNumber} The new case doesn't start with the first party.`,
+        );
       }
 
       currentCase.deathIn24Hours = deathIn24Hours;
