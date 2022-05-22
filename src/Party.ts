@@ -251,6 +251,7 @@ export enum Citizenship {
 }
 
 interface PartyParameters {
+    id: string;
     order: number;
     vehicle: Vehicle;
     gender?: Gender;

@@ -4,6 +4,7 @@ import readline from 'readline';
 
 import csv from 'csv-parser';
 import luxon from 'luxon';
+import shortUUID from 'short-uuid';
 
 import { staticImplements } from '../utilities';
 import BaseParser from './BaseParser';
@@ -97,6 +98,7 @@ export default class TYCParser {
       let vehicleCode = data['當事者區分類別'];
       vehicleCode = vehicleCode === 'NA' ? '' : vehicleCode;
       const party = new Party({
+        id: shortUUID.generate(),
         order: Number(data['當事者順序']),
         vehicle: Vehicle.codeToVehicleMapping[vehicleCode],
       });
@@ -202,7 +204,7 @@ export default class TYCParser {
         severity = Severity.ONLY_PROPERTY_DAMAGE;
       }
       const currentCase = new Case({
-        id: `${date.toFormat('yyyyMMdd_HHmm')}_${location}`,
+        id: shortUUID.generate(),
         date,
         location,
         firstAdministrativeLevel: data['縣市'],
@@ -210,7 +212,10 @@ export default class TYCParser {
         severity,
         parties: [],
       });
-      if (currentCase.id !== prevCase?.id && party.order !== 1) {
+      if (
+        (currentCase.date !== prevCase?.date || currentCase.location !== prevCase?.location)
+        && party.order !== 1
+      ) {
         throw new Error(`${filename}:${line} The new case doesn't start with the first party.`);
       }
 
