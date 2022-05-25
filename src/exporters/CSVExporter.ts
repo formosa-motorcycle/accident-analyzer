@@ -739,7 +739,7 @@ export default class CSVExporter {
     const toStringStream = transform(cases, (curCase: Case): StringifiedCase => {
       const transmformedCase: StringifiedCase = {
         id: curCase.id,
-        date: curCase.date.toISO(),
+        date: curCase.date.toISO({ includeOffset: false }),
         location: curCase.location,
         firstAdministrativeLevel: curCase.firstAdministrativeLevel,
         secondAdministrativeLevel: curCase.secondAdministrativeLevel,
