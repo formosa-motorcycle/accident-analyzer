@@ -679,6 +679,7 @@ export default class CSVExporter {
             });
             const toCSVStream = stringify({
                 header: true,
+                bom: true,
                 columns: [
                     { key: 'id', header: '案件編號' },
                     { key: 'date', header: '時間' },
@@ -752,6 +753,7 @@ export default class CSVExporter {
             const partyFileStream = fs.createWriteStream(partyFilename);
             const caseStringifyStream = stringify({
                 header: true,
+                bom: true,
                 columns: [
                     { key: 'id', header: '案件編號' },
                     { key: 'date', header: '時間' },
@@ -785,6 +787,7 @@ export default class CSVExporter {
             });
             const partyStream = stringify({
                 header: true,
+                bom: true,
                 columns: [
                     { key: 'id', header: '當事人編號' },
                     { key: 'caseId', header: '案件編號' },
