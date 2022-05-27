@@ -12,15 +12,15 @@ async function downloadTYCData() {
 }
 async function parseAndExportTYCDate() {
     const allCases = await Promise.all([
-        TYCParser.parseCSV(`${dataDir}/tyc/101.csv`),
-        TYCParser.parseCSV(`${dataDir}/tyc/102.csv`),
-        TYCParser.parseCSV(`${dataDir}/tyc/traffic_accident_103.csv`),
-        TYCParser.parseCSV(`${dataDir}/tyc/traffic_accident_104.csv`),
-        TYCParser.parseCSV(`${dataDir}/tyc/traffic_accident_105.csv`),
+        new TYCParser(`${dataDir}/tyc/101.csv`).parse(),
+        new TYCParser(`${dataDir}/tyc/102.csv`).parse(),
+        new TYCParser(`${dataDir}/tyc/traffic_accident_103.csv`).parse(),
+        new TYCParser(`${dataDir}/tyc/traffic_accident_104.csv`).parse(),
+        new TYCParser(`${dataDir}/tyc/traffic_accident_105.csv`).parse(),
         // not support yet
-        // TYCParser.parseCSV(`${dataDir}/tyc/traffic106_10809_fix.csv`),
-        // TYCParser.parseCSV(`${dataDir}/tyc/traffic109_fix.csv`),
-        // TYCParser.parseCSV(`${dataDir}/tyc/traffic11011_fix.csv`),
+        // new TYCParser(`${dataDir}/tyc/traffic106_10809_fix.csv`).parse(),
+        // new TYCParser(`${dataDir}/tyc/traffic109_fix.csv`).parse(),
+        // new TYCParser(`${dataDir}/tyc/traffic11011_fix.csv`).parse(),
     ]);
     CSVExporter.export(`${outputsDir}/tyc/tyc-2012_2016.csv`, [].concat(...allCases), 
     /* partyNumber= */ 2);

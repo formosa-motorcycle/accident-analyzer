@@ -45,6 +45,7 @@ rules:
   semi: off
   '@typescript-eslint/semi':
     - error
+  no-underscore-dangle: off
 settings:
   import/parsers:
     '@typescript-eslint/parser':
